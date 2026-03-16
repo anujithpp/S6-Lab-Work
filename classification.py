@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from tensorflow.keras.datasets import mnist
+from sklearn.datasets import fetch_openml
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
@@ -22,11 +22,17 @@ print("LOADING AND PREPROCESSING DATA")
 print("="*60)
 
 # Load MNIST dataset
-(x_train_full, y_train_full), (x_test, y_test) = mnist.load_data()
+print("Downloading/Loading MNIST dataset from OpenML... (This may take a minute)")
+mnist_data = fetch_openml('mnist_784', version=1, as_frame=False, parser='auto')
+X, y = mnist_data["data"], mnist_data["target"].astype(int)
 
-# Flatten images from 28x28 to 784 features
-x_train_full = x_train_full.reshape(-1, 784).astype('float32') / 255.0
-x_test = x_test.reshape(-1, 784).astype('float32') / 255.0
+# Split into standard train/test sets (first 60k is train, last 10k is test)
+x_train_full, x_test = X[:60000], X[60000:]
+y_train_full, y_test = y[:60000], y[60000:]
+
+# Data is already flattened, just normalize to 0-1
+x_train_full = x_train_full.astype('float32') / 255.0
+x_test = x_test.astype('float32') / 255.0
 
 # Split into train and validation sets
 x_train, x_val, y_train, y_val = train_test_split(
